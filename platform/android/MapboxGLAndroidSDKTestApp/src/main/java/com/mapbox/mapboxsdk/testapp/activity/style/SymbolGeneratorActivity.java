@@ -14,12 +14,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.GsonBuilder;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.mapboxsdk.style.sources.Source;
@@ -31,15 +31,24 @@ import com.mapbox.services.commons.geojson.Geometry;
 import com.mapbox.services.commons.geojson.custom.GeometryDeserializer;
 import com.mapbox.services.commons.geojson.custom.PositionDeserializer;
 import com.mapbox.services.commons.models.Position;
+import timber.log.Timber;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import timber.log.Timber;
-
+import static com.mapbox.mapboxsdk.style.expressions.Expression.concat;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.division;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.downcase;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.pi;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.product;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.sqrt;
+import static com.mapbox.mapboxsdk.style.expressions.Expression.upcase;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleRadius;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 
 /**
  * Test activity showcasing using a symbol generator that generates Bitmaps from Android SDK Views.
@@ -220,7 +229,22 @@ public class SymbolGeneratorActivity extends AppCompatActivity implements OnMapR
       mapboxMap.addLayer(new SymbolLayer(LAYER_ID, SOURCE_ID)
         .withProperties(
           iconImage("{" + FEATURE_ID + "}"), // { } is a token notation
-          iconAllowOverlap(false)
+          iconAllowOverlap(false),
+          iconSize(
+            product(
+              Expression.get("scalerank"),
+              pi()
+            )
+          ),
+          textField(
+            concat(
+              downcase("BLA-"),
+              upcase(
+                Expression.get("formal_en")
+              ),
+              "-BLA"
+            )
+          )
         )
       );
 
